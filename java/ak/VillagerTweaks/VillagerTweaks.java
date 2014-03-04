@@ -7,8 +7,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid="VillagerTweaks", name="VillagerTweaks", version="1.1",dependencies="required-after:FML")
-//@NetworkMod(clientSideRequired=true, serverSideRequired=false)
+@Mod(modid="VillagerTweaks", name="VillagerTweaks", version="1.1a",dependencies="required-after:FML", useMetadata = true)
 
 public class VillagerTweaks
 {

@@ -53,7 +53,7 @@ public class VillagerInteractHook
 		String chat;
 		if(event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK 
 				&& event.entityPlayer.getCurrentEquippedItem() != null 
-				&& getUniqueStrings(event.entityPlayer.getCurrentEquippedItem()).equals(VillagerTweaks.posChangeItem))
+				&& getUniqueStrings(event.entityPlayer.getCurrentEquippedItem().getItem()).equals(VillagerTweaks.posChangeItem))
 		{
 			pos = new ChunkPosition(event.x, event.y, event.z);
 			chat = String.format("Regist Home Pos x: %d y: %d z: %d", event.x,event.y,event.z);
