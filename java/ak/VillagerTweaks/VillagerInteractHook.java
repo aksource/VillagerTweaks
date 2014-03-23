@@ -21,6 +21,7 @@ import cpw.mods.fml.common.registry.VillagerRegistry;
 
 public class VillagerInteractHook
 {
+    public static int vanillaTraderkind = 5;
 	private Random rand = new Random();
 	public static ChunkPosition pos = new ChunkPosition(0, -1, 0);
 	@SubscribeEvent
@@ -68,8 +69,8 @@ public class VillagerInteractHook
 	private void changeVillagerProfession(EntityVillager vil, ItemStack changeItem)
 	{
 		int extra = VillagerRegistry.getRegisteredVillagers().size();
-        int trade = rand.nextInt(5 + extra);
-        vil.setProfession(trade < 5 ? trade : ((List<Integer>)VillagerRegistry.getRegisteredVillagers()).get(trade - 5));
+        int trade = rand.nextInt(vanillaTraderkind + extra);
+        vil.setProfession(trade < vanillaTraderkind ? trade : (Integer)VillagerRegistry.getRegisteredVillagers().toArray()[trade - vanillaTraderkind]);
 		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
 		changeItem.stackSize--;
 	}
