@@ -1,23 +1,21 @@
 package ak.VillagerTweaks;
 
-import java.util.List;
-import java.util.Random;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.village.Village;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.event.entity.player.EntityInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import cpw.mods.fml.common.registry.VillagerRegistry;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.village.Village;
+import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+
+import java.util.Random;
 
 public class VillagerInteractHook
 {
@@ -41,7 +39,7 @@ public class VillagerInteractHook
 				changeVillagerProfession(vil, item);
 				event.setCanceled(true);
 			}
-			else if(getUniqueStrings(event.entityPlayer.getCurrentEquippedItem()).equals(VillagerTweaks.posChangeItem))
+			else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.posChangeItem))
 			{
 				changeVillagerHomePos(vil,event.entityPlayer);
 				event.setCanceled(true);
@@ -58,7 +56,7 @@ public class VillagerInteractHook
 		{
 			pos = new ChunkPosition(event.x, event.y, event.z);
 			chat = String.format("Regist Home Pos x: %d y: %d z: %d", event.x,event.y,event.z);
-			event.entityPlayer.addChatMessage(new ChatComponentTranslation(chat, new Object[]{}));
+			event.entityPlayer.addChatMessage(new ChatComponentText(chat));
 		}
 	}
 	private void changeVillagerTrade(EntityVillager vil, ItemStack changeItem)
@@ -82,20 +80,15 @@ public class VillagerInteractHook
 			return;
 		vil.setHomeArea(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, (int)((float)(village.getVillageRadius() * 0.6F)));
 		chat = String.format("Set Home Pos x: %d y: %d z: %d", pos.chunkPosX,pos.chunkPosY,pos.chunkPosZ);
-		player.addChatMessage(new ChatComponentTranslation(chat, new Object[]{}));
+		player.addChatMessage(new ChatComponentText(chat));
 	}
 	private void setVillagerMating(EntityVillager vil, ItemStack setItem)
 	{
 		setItem.stackSize--;
 	}
-	public static String getUniqueStrings(Object obj)
+	public static String getUniqueStrings(Item item)
 	{
-		UniqueIdentifier uId;
-		if(obj instanceof Block) {
-			uId = GameRegistry.findUniqueIdentifierFor((Block) obj);
-		}else {
-			uId = GameRegistry.findUniqueIdentifierFor((Item) obj);
-		}
+		UniqueIdentifier uId = GameRegistry.findUniqueIdentifierFor(item);
 		return uId.modId + ":" + uId.name;
 
 	}
