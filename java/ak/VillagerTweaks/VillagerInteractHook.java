@@ -1,10 +1,12 @@
 package ak.VillagerTweaks;
 
+import com.google.common.base.Optional;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import cpw.mods.fml.common.registry.VillagerRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -86,10 +88,17 @@ public class VillagerInteractHook
 	{
 		setItem.stackSize--;
 	}
-	public static String getUniqueStrings(Item item)
-	{
-		UniqueIdentifier uId = GameRegistry.findUniqueIdentifierFor(item);
-		return uId.modId + ":" + uId.name;
-
-	}
+    public static String getUniqueStrings(Object obj) {
+        UniqueIdentifier uId = null;
+        if (obj instanceof ItemStack) {
+            obj = ((ItemStack)obj).getItem();
+        }
+        if (obj instanceof Block) {
+            uId = GameRegistry.findUniqueIdentifierFor((Block) obj);
+        }
+        if (obj instanceof Item){
+            uId = GameRegistry.findUniqueIdentifierFor((Item) obj);
+        }
+        return Optional.fromNullable(uId).or(new UniqueIdentifier("none:dummy")).toString();
+    }
 }
