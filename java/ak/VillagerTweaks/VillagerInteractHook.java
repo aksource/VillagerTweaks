@@ -1,11 +1,12 @@
 package ak.VillagerTweaks;
 
 import com.google.common.base.Optional;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
-import cpw.mods.fml.common.registry.VillagerRegistry;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry.UniqueIdentifier;
+import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,7 +14,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.village.Village;
-import net.minecraft.world.ChunkPosition;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -23,7 +23,7 @@ public class VillagerInteractHook
 {
     public static int vanillaTraderkind = 5;
 	private Random rand = new Random();
-	public static ChunkPosition pos = new ChunkPosition(0, -1, 0);
+	public static BlockPos pos = new BlockPos(0, -1, 0);
 	@SubscribeEvent
 	public void interactEvent(EntityInteractEvent event)
 	{
@@ -56,32 +56,42 @@ public class VillagerInteractHook
 				&& event.entityPlayer.getCurrentEquippedItem() != null 
 				&& getUniqueStrings(event.entityPlayer.getCurrentEquippedItem().getItem()).equals(VillagerTweaks.posChangeItem))
 		{
-			pos = new ChunkPosition(event.x, event.y, event.z);
-			chat = String.format("Regist Home Pos x: %d y: %d z: %d", event.x,event.y,event.z);
+			pos = event.pos;
+			chat = String.format("Regist Home Pos x: %d y: %d z: %d", event.pos.getX(),event.pos.getY(),event.pos.getZ());
 			event.entityPlayer.addChatMessage(new ChatComponentText(chat));
 		}
 	}
+
 	private void changeVillagerTrade(EntityVillager vil, ItemStack changeItem)
 	{
 		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
+//        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, this.rand.nextInt(aitradelist.length) + 1, 11);
+        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, 1, 12);
 		changeItem.stackSize--;
 	}
+
+    private void chageVillagerCareerId(EntityVillager vil, ItemStack changeItem) {
+        //todo 村人のキャリアを変える。Forge待ち
+    }
+
 	private void changeVillagerProfession(EntityVillager vil, ItemStack changeItem)
 	{
 		int extra = VillagerRegistry.getRegisteredVillagers().size();
         int trade = rand.nextInt(vanillaTraderkind + extra);
         vil.setProfession(trade < vanillaTraderkind ? trade : (Integer)VillagerRegistry.getRegisteredVillagers().toArray()[trade - vanillaTraderkind]);
-		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
-		changeItem.stackSize--;
+        changeVillagerTrade(vil, changeItem);
+//		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
+//		changeItem.stackSize--;
 	}
+
 	private void changeVillagerHomePos(EntityVillager vil, EntityPlayer player)
 	{
 		String chat;
 		Village village = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, vil, 3);
 		if(village == null)
 			return;
-		vil.setHomeArea(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, (int)((float)(village.getVillageRadius() * 0.6F)));
-		chat = String.format("Set Home Pos x: %d y: %d z: %d", pos.chunkPosX,pos.chunkPosY,pos.chunkPosZ);
+		vil.func_175449_a(pos, (int)((float)(village.getVillageRadius() * 0.6F)));//setHomeArea
+		chat = String.format("Set Home Pos x: %d y: %d z: %d", pos.getX(),pos.getY(),pos.getZ());
 		player.addChatMessage(new ChatComponentText(chat));
 	}
 	private void setVillagerMating(EntityVillager vil, ItemStack setItem)
