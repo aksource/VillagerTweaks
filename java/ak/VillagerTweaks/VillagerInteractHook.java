@@ -2,6 +2,7 @@ package ak.VillagerTweaks;
 
 import com.google.common.base.Optional;
 import net.minecraft.util.BlockPos;
+import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -24,28 +25,26 @@ public class VillagerInteractHook
     public static int vanillaTraderkind = 5;
 	private Random rand = new Random();
 	public static BlockPos pos = new BlockPos(0, -1, 0);
+    private static final EntityVillager.ITradeList[][][][] fullLists = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, null, 16);//field_175561_bA;
 	@SubscribeEvent
 	public void interactEvent(EntityInteractEvent event)
 	{
 		ItemStack item = event.entityPlayer.getCurrentEquippedItem();
-		if(event.target instanceof EntityVillager && item != null)
-		{
+		if(event.target instanceof EntityVillager && item != null) {
 			EntityVillager vil = (EntityVillager) event.target;
-			if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.changeTradeItem))
-			{
-				changeVillagerTrade(vil, item);
+			if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.changeTradeItem)) {
+				changeVillagerTrade(vil, event.entityPlayer, item);
 				event.setCanceled(true);
-			}
-			else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.changeProfessionItem))
-			{
-				changeVillagerProfession(vil, item);
+			} else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.changeProfessionItem)) {
+				changeVillagerProfession(vil, event.entityPlayer, item);
 				event.setCanceled(true);
-			}
-			else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.posChangeItem))
-			{
+			} else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.posChangeItem)) {
 				changeVillagerHomePos(vil,event.entityPlayer);
 				event.setCanceled(true);
-			}
+			} else if(getUniqueStrings(item.getItem()).equals(VillagerTweaks.changeCareerItem)) {
+                changeVillagerCareerId(vil, event.entityPlayer, item);
+                event.setCanceled(true);
+            }
 		}
 	}
 	@SubscribeEvent
@@ -62,24 +61,43 @@ public class VillagerInteractHook
 		}
 	}
 
-	private void changeVillagerTrade(EntityVillager vil, ItemStack changeItem)
-	{
-		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
+	private void changeVillagerTrade(EntityVillager vil, EntityPlayer player, ItemStack changeItem) {
+        MerchantRecipeList merchantRecipeList = new MerchantRecipeList();
+        int profession = vil.getProfession();
+        int careerId = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, vil, 11);//careerId
+        int careerLevel = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, vil, 12);
+        EntityVillager.ITradeList[] tradeLists = fullLists[profession][careerId - 1][0];
+        for (EntityVillager.ITradeList tradeList : tradeLists) {
+            tradeList.modifyMerchantRecipeList(merchantRecipeList, vil.getRNG());
+        }
+		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, merchantRecipeList, 5);//buyingList
 //        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, this.rand.nextInt(aitradelist.length) + 1, 11);
-        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, 1, 12);
-		changeItem.stackSize--;
-	}
-
-    private void chageVillagerCareerId(EntityVillager vil, ItemStack changeItem) {
-        //todo 村人のキャリアを変える。Forge待ち
+        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, 1, 12);//careerLevel
+        if (!player.capabilities.isCreativeMode) {
+            changeItem.stackSize--;
+        }
     }
 
-	private void changeVillagerProfession(EntityVillager vil, ItemStack changeItem)
+    private void changeVillagerCareerId(EntityVillager vil, EntityPlayer player, ItemStack changeItem) {
+        int careerMax = fullLists[vil.getProfession()].length;
+        int careerId = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, vil, 11);//careerId
+        if (careerId >= careerMax) {
+            careerId = 1;
+        } else {
+            careerId++;
+        }
+        ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, careerId, 11);//careerId
+        //todo 村人のキャリアを変える。Forge待ち
+        changeVillagerTrade(vil, player, changeItem);
+    }
+
+	private void changeVillagerProfession(EntityVillager vil, EntityPlayer player, ItemStack changeItem)
 	{
 		int extra = VillagerRegistry.getRegisteredVillagers().size();
         int trade = rand.nextInt(vanillaTraderkind + extra);
         vil.setProfession(trade < vanillaTraderkind ? trade : (Integer)VillagerRegistry.getRegisteredVillagers().toArray()[trade - vanillaTraderkind]);
-        changeVillagerTrade(vil, changeItem);
+        changeVillagerCareerId(vil, player, changeItem);
+        changeVillagerTrade(vil, player, changeItem);
 //		ObfuscationReflectionHelper.setPrivateValue(EntityVillager.class, vil, null, 5);
 //		changeItem.stackSize--;
 	}

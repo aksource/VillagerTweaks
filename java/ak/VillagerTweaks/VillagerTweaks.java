@@ -16,6 +16,7 @@ public class VillagerTweaks
 
 	public static String changeTradeItem;
 	public static String changeProfessionItem;
+    public static String changeCareerItem;
 	public static String posChangeItem;
 	public static String setMatingItem;
 	@Mod.EventHandler
@@ -24,8 +25,9 @@ public class VillagerTweaks
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
 		changeTradeItem = config.get(Configuration.CATEGORY_GENERAL, "ChangeTradeItem", "minecraft:gold_ingot", "set Trade Changing Item Name").getString();
-		changeProfessionItem = config.get(Configuration.CATEGORY_GENERAL, "ChangfeProfesstionItem", "minecraft:golden_apple", "set Profession Changing Item Name").getString();
-		posChangeItem = config.get(Configuration.CATEGORY_GENERAL, "HomePosChangeItemIDs", "minecraft:arrow").getString();
+		changeProfessionItem = config.get(Configuration.CATEGORY_GENERAL, "ChangeProfessionItem", "minecraft:golden_apple", "set Profession Changing Item Name").getString();
+        changeCareerItem = config.get(Configuration.CATEGORY_GENERAL, "ChangeCareerItem", "minecraft:iron_ingot", "set Career Changing Item Name").getString();
+        posChangeItem = config.get(Configuration.CATEGORY_GENERAL, "HomePosChangeItemIDs", "minecraft:arrow", "set Home Position Changing Item Name").getString();
 //		setMatingItem = config.get(Configuration.CATEGORY_GENERAL, "SetMateItem", Item.diamond.itemID, "set Mating Item ID").getInt();
 		config.save();
 	}
