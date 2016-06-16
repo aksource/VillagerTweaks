@@ -108,7 +108,7 @@ public class VillagerInteractHook
 		Village village = ObfuscationReflectionHelper.getPrivateValue(EntityVillager.class, vil, 3);
 		if(village == null)
 			return;
-		vil.func_175449_a(pos, (int)((float)(village.getVillageRadius() * 0.6F)));//setHomeArea
+		vil.setHomePosAndDistance(pos, (int)((float)(village.getVillageRadius() * 0.6F)));//setHomeArea
 		chat = String.format("Set Home Pos x: %d y: %d z: %d", pos.getX(),pos.getY(),pos.getZ());
 		player.addChatMessage(new ChatComponentText(chat));
 	}
